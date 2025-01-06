@@ -34,6 +34,6 @@ if [[ -n "${LANG}" ]]; then
 fi
 
 chown proftpd:proftpd /usr/local/bin/processing > dev/null 2>&1
-chmod chmod a+x /usr/local/bin/processing > dev/null 2>&1
+chmod a+x /usr/local/bin/processing > dev/null 2>&1
 
 /usr/sbin/proftpd -n -p /var/run/proftpd.pid -c /etc/proftpd/proftpd.conf
