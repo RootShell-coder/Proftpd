@@ -1,0 +1,28 @@
+---
+volumes:
+  proftpd-home:
+    name: "proftpd-home"
+
+services:
+  proftpd:
+    image: "ghcr.io/rootshell-coder/proftpd:latest"
+    network_mode: "host"
+    volumes:
+      - "./docker/processing:/usr/local/bin/processing"
+      - "proftpd-home:/home:rw"
+    environment:
+      PROFTPD_USER: "user1:password1:1001:1001, user2:password2:1002:1002"
+      PROFTPD_MASQUERADE_ADDRESS: "proftpd"
+      PROFTPD_PASSIVE_PORTS: "30000-30100"
+      TZ: "Europe/Moscow"
+      LANG: "ru_RU.UTF8"
+      LC_ALL: "ru_RU.UTF-8"
+    restart: "always"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: "1024M"
+        reservations:
+          cpus: "0.64"
+          memory: "512M"

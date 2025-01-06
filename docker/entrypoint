@@ -1,0 +1,39 @@
+#!/bin/sh
+
+if [ -z "${PROFTPD_USER}" ]; then
+    echo "The USER variable is not set or empty."
+    exit 1
+fi
+
+USER=$(echo "$PROFTPD_USER" | sed 's/[[:space:]]//g')
+users=$(echo "$USER" | tr ',' '\n')
+for user in $users; do
+    set -- $(echo "$user" | tr ':' ' ')
+    login=$1; password=$2; uid=$3; gid=$4
+    adduser --disabled-password --gecos "" --uid "$uid" "$login"
+    echo "$login:$password" | chpasswd
+      if [ ! -z "$gid" ]; then
+        addgroup --system "$gid" || true
+        adduser "$login" "$gid"
+      fi
+    usermod -aG proftpd "$login"
+done
+
+if [[ -n "${PROFTPD_PASSIVE_PORTS}" ]]; then
+  set -- $(echo "$PROFTPD_PASSIVE_PORTS" | tr '-' ' ')
+  sed -i "s/^PassivePorts.*$/PassivePorts $1 $2/" /etc/proftpd/proftpd.conf
+fi
+
+if [[ -n "${PROFTPD_MASQUERADE_ADDRESS}" ]]; then
+  sed -i "s/^MasqueradeAddress.*$/MasqueradeAddress ${PROFTPD_MASQUERADE_ADDRESS}/" /etc/proftpd/proftpd.conf
+fi
+
+if [[ -n "${LANG}" ]]; then
+  lang=$(echo "$LANG" | cut -d. -f1)
+  sed -i "s/LangDefault.*$/LangDefault $lang/" /etc/proftpd/conf.d/lang.conf
+fi
+
+chown proftpd:proftpd /usr/local/bin/processing > dev/null 2>&1
+chmod chmod a+x /usr/local/bin/processing > dev/null 2>&1
+
+/usr/sbin/proftpd -n -p /var/run/proftpd.pid -c /etc/proftpd/proftpd.conf
