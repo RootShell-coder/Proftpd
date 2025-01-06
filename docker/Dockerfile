@@ -2,6 +2,8 @@ FROM alpine:latest
 
 RUN set -eux; \
     apk add --no-cache \
+    curl \
+    bash \
     shadow \
     musl \
     musl-locales-lang \
